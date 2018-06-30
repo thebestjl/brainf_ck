@@ -1,38 +1,21 @@
 #include "bf_interpreter.h"
 
-void bf::initialize(char* data, char * loop)	{
-	for (int i = 0; i < MAX_SIZE; i++) {
-		data[i] = 0;
-		loop[i] = 0;
-	}
-}
-
-std::string bf::read_input(std::string filename) {
-	std::ifstream file(filename);
-	std::stringstream data_reader;
-	std::string line;
-	
-	if (!file.is_open())
-		throw std::exception("Error opening file.");
-	
-	while (file.is_open() && std::getline(file, line))
-		data_reader << line;
-
-	file.close();
-
-	return data_reader.str();
-}
-
+/*
+ * Classic implementation of bf interpreter using pointers.
+ */
 void bf::interpret(const std::string filename) {
+	std::string bf_text;
 	try	{
-		std::string bf_text = read_input(filename);
+		bf_text = read_input(filename);
+	}
+	catch (const std::exception& e) {
+		throw e;
+	}
 
-		char data[MAX_SIZE];
-		char loop[MAX_SIZE];
-		initialize(data, loop);
-
-		char *ptr_data = data;
-		char *ptr_loop = loop;
+	try	{
+		char *ptr_data = new char[MAX_SIZE];
+		int *ptr_loop = new int[MAX_SIZE];
+		initialize(ptr_data, ptr_loop);
 
 		for (int i = 0; i < bf_text.length(); i++) {
 			switch (bf_text.at(i)) {
@@ -74,13 +57,21 @@ void bf::interpret(const std::string filename) {
 	}	
 }
 
+/*
+ * Simpler implementation using arrays and index variables.
+ */
 void bf::interpret_no_ptrs(const std::string filename) {
-	try
-	{
-		std::string bf_text = read_input(filename);
+	std::string bf_text;
+	try {
+		bf_text = read_input(filename);
+	}
+	catch (const std::exception& e) {
+		throw e;
+	}
 
+	try {
 		char data[MAX_SIZE];
-		char loop[MAX_SIZE];
+		int loop[MAX_SIZE];
 		initialize(data, loop);
 
 		int data_ind = 0;
@@ -125,4 +116,40 @@ void bf::interpret_no_ptrs(const std::string filename) {
 	{
 		throw e;
 	}
+}
+
+/*
+ * Initialize the arrays to 0.
+ */
+void bf::initialize(char *data, int *loop) {
+	for (int i = 0; i < MAX_SIZE; i++) {
+		data[i] = 0;
+		loop[i] = 0;
+	}
+}
+
+/*
+* Open the file and read in all of its input.
+* Uses more memory, but doesn't have to keep the file open
+* during interpretation. So... yeah.
+*/
+std::string bf::read_input(std::string filename) {
+
+	std::stringstream data_reader;
+	std::string line;
+	try {
+		std::ifstream file(filename);
+		if (!file.is_open())
+			throw std::exception("Error opening file.");
+
+		while (file.is_open() && std::getline(file, line))
+			data_reader << line;
+
+		file.close();
+	}
+	catch (const std::exception& e) {
+		throw std::exception("Error reading file: " + *e.what());
+	}
+
+	return data_reader.str();
 }

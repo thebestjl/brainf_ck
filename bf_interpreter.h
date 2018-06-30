@@ -7,7 +7,7 @@ class bf {
 private:
 	const static int MAX_SIZE = 510000;
 
-	static void initialize(char *data, char *loop);
+	static void initialize(char *data, int *loop);
 	static std::string read_input(std::string);
 	
 public:
